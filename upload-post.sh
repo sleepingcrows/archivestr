@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-
+: ${1?"Usage: $0 <path to file>"}
 REQUIRED=(
   NSECKEY
   BLOSSOMSRV
@@ -20,7 +20,31 @@ for var in "${REQUIRED[@]}"; do
   }
 done
 
-#File Check
+#for cmd in nak sed grep god; do 
+#  command -v "$cmd" >/dev/null 2>&1 || echo "$cmd is missing, install it." && exit 1
+#done
+
+COMMANDS=("awk" "grep" "nak")
+missing_apps=()
+for app in "${COMMANDS[@]}"; do 
+  if ! command -v "$app" &> /dev/null; then 
+    missing_apps+=("$app")
+  fi 
+done 
+
+if [[ ${#missing_apps[@]} -gt 0 ]]; then
+  echo "error: missing commands" 
+  for app in "${missing_apps[@]}"; do 
+     echo $app 
+   done
+   echo "make sure you have them installed, or that your PATH is set. exiting."
+   exit 1
+fi
+
+if [ -z {$1} ]; then
+  exit 1
+fi
+
 if [ ! -f $1 ]; then
   echo "File $1 does not exist. Exiting"
   exit 1
@@ -51,6 +75,7 @@ else
   echo $RATING
 fi
 
+echo "done"
 # content format
 # <URL>\n 
 # Creator: $CREATOR\n
