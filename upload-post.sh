@@ -53,13 +53,47 @@ if [ ! -f $SIDECAR ]; then
 fi
 
 CREATORS=() #can be multiple.
-RATING=() #should only ever have one content rating.
+RATINGS=() #should only ever have one content rating.
 SPECIES=() #furry centric namespace.
+CHARACTERS=()
 SERIES=() #copyright holders, content titles
 TAGS=() #general tags.
 
 #read each tag from sidecar. filter by namespace. convert spaces to underscores.
+echo "===processing tags.==="
+while IFS= read -r line; do 
+  #printf '%s\n' "$line"
+  case $line in 
+    creator:*)
+      CREATORS+=("${line:8}")
+      ;;
+    rating:*)
+      RATINGS+=("${line:7}")
+      ;;
+    species:*)
+      SPECIES+=("${line:8}")
+      ;;
+    character:*)
+      CHARACTERS+=("${line:10}")
+      ;;
+    series:*)
+      SERIES+=("${line}")
+      ;;
+    *)
+      TAGS+=("$line")
+      ;;
+  esac 
 
+done < $SIDECAR
+
+#Add validation to make sure a creator name and rating are applied.
+#Exit out if there was no rating, or creator. these are the bare minimum.
+
+echo "Creators: ${CREATORS[@]}"
+echo "Ratings: ${RATINGS[@]}"
+echo "Species: ${SPECIES[@]}"
+echo "Characters: ${CHARACTERS[@]}"
+echo "Tags: ${TAGS[@]}"
 
 echo "done"
 # Why Did i think this was a good idea...
