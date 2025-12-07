@@ -109,8 +109,45 @@ echo "Series: ${SERIES[@]}"
 echo "Characters: ${CHARACTERS[@]}"
 echo "Tags: ${TAGS[@]}"
 
+
+CONTENT=""
+TAGLINE=""
+
+echo ===Uploading File===
+UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
+echo $UPLOADURL
 echo "done"
-# Why Did i think this was a good idea...
+
+CONTENT+=$UPLOADURL
+CONTENT+=" \n"
+
+counter=0
+set +u
+if [ ${#CREATORS[@]} -gt 1 ]; then
+  CONTENT+="Creators: "
+  for creator in "${CREATORS[@]}"; do
+    if (( counter == 0 )); then
+      CONTENT+="$creator"
+      let "counter+=1"
+    else
+      CONTENT+=", $creator"
+    fi
+  done
+else
+  CONTENT+="Creator: "
+  CONTENT+="$CREATORS"
+fi
+set -u
+CONTENT+=" \n"
+
+
+#for creator in "${CREATORS[@]}"; do 
+#  CONTENT
+#
+echo $CONTENT
+
+# notes:
+# client tag is just -t "client"="name"
 
 #CREATOR=$(grep '^creator:' $SIDECAR | sed -E 's/.*creator:\s*([^\s]+).*/\1/')
 #echo creator: $CREATOR
@@ -145,8 +182,6 @@ echo "done"
 # $TAGS
 # ====
 # one-line '-c <URL>\nCreator: $CREATOR\n$TAGS'
-
-#UPLOAD=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url)
 #upload to mirrors just in case.
 #nak blossom --server "blossom.yakihonne.com" --sec 01 upload $1
 #nak blossom --server "blossom.sector01.com" --sec 01 upload $1 
