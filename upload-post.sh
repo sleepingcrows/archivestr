@@ -139,11 +139,34 @@ else
 fi
 set -u
 CONTENT+=" \n"
+HASHTAGS=""
+#Hashtags
+#Bash seems to act pretty dumb when trying to pool together many arrays. Maybe I'm just dumb.
+for tag in "${SPECIES[@]}"; do 
+  [[ -z "$tag" ]] && continue
+  clean=$(printf '%s' "$tag" | sed 's/ /_/g')
+  HASHTAGS+="#$clean "
+done
 
+for tag in "${SERIES[@]}"; do 
+  [[ -z "$tag" ]] && continue
+  clean=$(printf '%s' "$tag" | sed 's/ /_/g')
+  HASHTAGS+="#$clean "
+done
 
-#for creator in "${CREATORS[@]}"; do 
-#  CONTENT
-#
+for tag in "${CHARACTERS[@]}"; do 
+  [[ -z "$tag" ]] && continue
+  clean=$(printf '%s' "$tag" | sed 's/ /_/g')
+  HASHTAGS+="#$clean "
+done
+
+for tag in "${TAGS[@]}"; do 
+  [[ -z "$tag" ]] && continue
+  clean=$(printf '%s' "$tag" | sed 's/ /_/g')
+  HASHTAGS+="#$clean "
+done
+
+CONTENT+="$HASHTAGS"
 echo $CONTENT
 
 # notes:
