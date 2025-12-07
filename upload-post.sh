@@ -20,11 +20,7 @@ for var in "${REQUIRED[@]}"; do
   }
 done
 
-#for cmd in nak sed grep god; do 
-#  command -v "$cmd" >/dev/null 2>&1 || echo "$cmd is missing, install it." && exit 1
-#done
-
-COMMANDS=("awk" "grep" "nak")
+COMMANDS=("sed" "grep" "nak")
 missing_apps=()
 for app in "${COMMANDS[@]}"; do 
   if ! command -v "$app" &> /dev/null; then 
@@ -56,26 +52,45 @@ if [ ! -f $SIDECAR ]; then
   exit 1
 fi
 
-CREATOR=$(grep '^creator:' $SIDECAR | sed -E 's/.*creator:\s*([^\s]+).*/\1/')
-echo $CREATOR
+CREATORS=() #can be multiple.
+RATING=() #should only ever have one content rating.
+SPECIES=() #furry centric namespace.
+SERIES=() #copyright holders, content titles
+TAGS=() #general tags.
 
-if [ -z $CREATOR ]; then
-  echo "Sidecar was missing a creator. exiting"
-  exit 1
-fi
+#read each tag from sidecar. filter by namespace. convert spaces to underscores.
 
-LINECOUNT=$(grep "^rating:" $SIDECAR | wc -l)
-echo $LINECOUNT
-if [[ $LINECOUNT -gt 1 ]]; then
-  echo "More than one safety rating, exiting."
-  exit 1 
-else
-  RATING=$(grep '^rating:' $SIDECAR | sed -E 's/.*rating:\s*([^ ]+).*/\1/')
-  #RATING=$(grep "^rating:" $SIDECAR | sed -E 's/.*rating:\s*([^\s]+).*/\1/')
-  echo $RATING
-fi
 
 echo "done"
+# Why Did i think this was a good idea...
+
+#CREATOR=$(grep '^creator:' $SIDECAR | sed -E 's/.*creator:\s*([^\s]+).*/\1/')
+#echo creator: $CREATOR
+#if [ -z $CREATOR ]; then
+#  echo "Sidecar was missing a creator. exiting"
+#  exit 1
+#fi
+
+#LINECOUNT=$(grep "^rating:" $SIDECAR | wc -l)
+#echo $LINECOUNT
+#if [[ $LINECOUNT -gt 1 ]]; then
+#  echo "More than one safety rating, exiting."
+#  exit 1 
+#else
+#  RATING=$(grep '^rating:' $SIDECAR | sed -E 's/.*rating:\s*([^ ]+).*/\1/')
+#  echo $RATING
+#fi
+
+#METATAGS=()
+#METATAGS+=('-t "namespace"="example"')
+
+#if [[ "$RATING" != "safe" ]]; then
+#  METATAGS+=("-t 'content-warning'='NSFW'")
+#  METATAGS+=("-t 'rating'='$RATING'")
+#else
+#  METATAGS+=("-t 'rating'='$RATING'")
+#fi
+
 # content format
 # <URL>\n 
 # Creator: $CREATOR\n
