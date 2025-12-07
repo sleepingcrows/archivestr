@@ -48,7 +48,7 @@ if [ ! -f $1 ]; then
   exit 1
 fi
 SIDECAR="$1.txt"
-#Sidecar Check
+
 if [ ! -f $SIDECAR ]; then
   echo "Sidecar for $1 does not exist."
   echo "Exiting."
@@ -63,10 +63,9 @@ CHARACTERS=()
 SERIES=() #copyright holders, content titles
 TAGS=() #general tags.
 
-#read each tag from sidecar. filter by namespace. convert spaces to underscores.
+
 echo "===processing tags.==="
 while IFS= read -r line; do 
-  #printf '%s\n' "$line"
   case $line in 
     creator:*)
       CREATORS+=("${line:8}")
@@ -90,8 +89,7 @@ while IFS= read -r line; do
 
 done < $SIDECAR
 
-#Add validation to make sure a creator name and rating are applied.
-#Exit out if there was no rating, or creator. these are the bare minimum.
+#Tag Validations
 set +u
 if [ ${#CREATORS[@]} -eq 0 ]; then
   echo "creator missing. exiting"
