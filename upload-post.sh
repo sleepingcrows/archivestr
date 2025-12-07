@@ -55,6 +55,7 @@ if [ ! -f $SIDECAR ]; then
   exit 1
 fi
 
+
 CREATORS=() #can be multiple.
 RATINGS=() #should only ever have one content rating.
 SPECIES=() #furry centric namespace.
@@ -80,7 +81,7 @@ while IFS= read -r line; do
       CHARACTERS+=("${line:10}")
       ;;
     series:*)
-      SERIES+=("${line}")
+      SERIES+=("${line:7}")
       ;;
     *)
       TAGS+=("$line")
@@ -91,10 +92,22 @@ done < $SIDECAR
 
 #Add validation to make sure a creator name and rating are applied.
 #Exit out if there was no rating, or creator. these are the bare minimum.
+set +u
+if [ ${#CREATORS[@]} -eq 0 ]; then
+  echo "creator missing. exiting"
+  exit 1
+fi
+
+if [ ${#RATINGS[@]} -ne 1 ]; then
+  echo "too many or too few ratings. exiting"
+  exit 1
+fi
+set -u
 
 echo "Creators: ${CREATORS[@]}"
 echo "Ratings: ${RATINGS[@]}"
 echo "Species: ${SPECIES[@]}"
+echo "Series: ${SERIES[@]}"
 echo "Characters: ${CHARACTERS[@]}"
 echo "Tags: ${TAGS[@]}"
 
