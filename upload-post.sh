@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-: ${1?"Usage: $0 <path to file>"}
+: ${1?"Usage: $0 <path to file>
+(every file needs a .txt sidecar with a rating and creator namespace at minimum!)"}
 REQUIRED=(
   NSECKEY
   BLOSSOMSRV
@@ -15,7 +16,7 @@ fi
 for var in "${REQUIRED[@]}"; do 
   : "${!var?: Missing required environment variable: $var}"
   [[ -n "${!var}" ]] || {
-    echo "ERROR: $var is set but empty." >&2 
+    echo "ERROR: $var is set but empty." >&2
     exit 1
   }
 done
@@ -42,13 +43,15 @@ if [ -z {$1} ]; then
 fi
 
 if [ ! -f $1 ]; then
-  echo "File $1 does not exist. Exiting"
+  echo "File $1 does not exist."
+  echo "Exiting."
   exit 1
 fi
 SIDECAR="$1.txt"
 #Sidecar Check
 if [ ! -f $SIDECAR ]; then
-  echo "Sidecar for $1 does not exist. Exiting"
+  echo "Sidecar for $1 does not exist."
+  echo "Exiting."
   exit 1
 fi
 
