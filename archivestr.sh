@@ -143,12 +143,14 @@ if [ ${#CREATORS[@]} -gt 1 ]; then
     else
       CONTENT+=", $creator"
     fi
-    METADATA+="-t creator=$creator "
+    clean=$(printf '%s' "$creator" | sed 's/ /_/g')
+    METADATA+="-t creator=$clean "
   done
 else
   CONTENT+="Creator: "
   CONTENT+="$CREATORS"
-  METADATA+="-t creator=$CREATORS "
+  clean=$(printf '%s' "$CREATORS" | sed 's/ /_/g')
+  METADATA+="-t creator=$clean "
 fi
 set -u
 echo $CONTENT >> note.tmp
