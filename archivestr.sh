@@ -121,8 +121,8 @@ nak blossom --server $BLOSSOMSRV2 --sec 01 upload $1 | jq .url | sed 's/\"//g'
 echo "===Uploading File to $BLOSSOMSRV3 -- Mirror 2 ==="
 nak blossom --server $BLOSSOMSRV3 --sec 01 upload $1 | jq .url | sed 's/\"//g'
 
-echo "" > note.tmp 
-echo $UPLOADURL >> note.tmp
+#echo "" > note.tmp 
+echo $UPLOADURL > note.tmp
 
 METADATA=""
 
@@ -188,5 +188,9 @@ done
 
 echo $HASHTAGS >> note.tmp
 echo $CONTENT
+
+#note cleanup.
+
+sed -i '3s/[()]//g' note.tmp
 
 nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY | nak event wss://relay.nostr.band
