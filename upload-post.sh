@@ -5,6 +5,8 @@ set -euo pipefail
 REQUIRED=(
   NSECKEY
   BLOSSOMSRV
+  BLOSSOMSRV2
+  BLOSSOMSRV3
   )
 
 if [[ -f .env ]]; then
@@ -111,16 +113,26 @@ echo "Tags: ${TAGS[@]}"
 
 CONTENT=""
 
-echo ===Uploading File===
+echo ===Uploading File to $BLOSSOMSRV===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
-echo "done"
+echo "===Uploading File to $BLOSSOMSRV2 -- Mirror 1 ==="
+nak blossom --server $BLOSSOMSRV2 --sec 01 upload $1 | jq .url | sed 's/\"//g'
+echo "===Uploading File to $BLOSSOMSRV3 -- Mirror 2 ==="
+nak blossom --server $BLOSSOMSRV3 --sec 01 upload $1 | jq .url | sed 's/\"//g'
 
 echo "" > note.tmp 
 echo $UPLOADURL >> note.tmp
 
+METADATA=""
 
-
+set +u
+if [[ ! " ${RATINGS[@]} " =~ " safe " ]]; then
+  METADATA+="-t content-warning=nsfw -t rating=$RATINGS "
+else
+  METADATA+="-t rating=$RATINGS "  
+fi
+set -u
 counter=0
 set +u
 if [ ${#CREATORS[@]} -gt 1 ]; then
@@ -132,10 +144,12 @@ if [ ${#CREATORS[@]} -gt 1 ]; then
     else
       CONTENT+=", $creator"
     fi
+    METADATA+="-t creator=$creator "
   done
 else
   CONTENT+="Creator: "
   CONTENT+="$CREATORS"
+  METADATA+="-t creator=$CREATORS "
 fi
 set -u
 echo $CONTENT >> note.tmp
@@ -148,62 +162,31 @@ for tag in "${SPECIES[@]}"; do
   [[ -z "$tag" ]] && continue
   clean=$(printf '%s' "$tag" | sed 's/ /_/g')
   HASHTAGS+="#$clean "
+  METADATA+="-t species=$clean "
 done
 
 for tag in "${SERIES[@]}"; do 
   [[ -z "$tag" ]] && continue
   clean=$(printf '%s' "$tag" | sed 's/ /_/g')
   HASHTAGS+="#$clean "
+  METADATA+="-t series=$clean "
 done
 
 for tag in "${CHARACTERS[@]}"; do 
   [[ -z "$tag" ]] && continue
   clean=$(printf '%s' "$tag" | sed 's/ /_/g')
   HASHTAGS+="#$clean "
+  METADATA+="-t character=$clean "
 done
 
 for tag in "${TAGS[@]}"; do 
   [[ -z "$tag" ]] && continue
   clean=$(printf '%s' "$tag" | sed 's/ /_/g')
   HASHTAGS+="#$clean "
+  METADATA+="-t t=$clean "
 done
 
 echo $HASHTAGS >> note.tmp
 echo $CONTENT
 
-# notes:
-# client tag is just -t "client"="name"
-
-#METATAGS+=('-t "namespace"="example"')
-
-#if [[ "$RATING" != "safe" ]]; then
-#  METATAGS+=("-t 'content-warning'='NSFW'")
-#  METATAGS+=("-t 'rating'='$RATING'")
-#else
-#  METATAGS+=("-t 'rating'='$RATING'")
-#fi
-
-# content format
-# <URL>\n 
-# Creator: $CREATOR\n
-# $TAGS
-# ====
-# one-line '-c <URL>\nCreator: $CREATOR\n$TAGS'
-#upload to mirrors just in case.
-#nak blossom --server "blossom.yakihonne.com" --sec 01 upload $1
-#nak blossom --server "blossom.sector01.com" --sec 01 upload $1 
-#nak blossom --server "blossom.band" --sec 01 upload $1
-#nak blossom --server "24242.io" --sec 01 upload $1
-#CLEANLINK=$(echo "$UPLOAD" | sed 's/\"//g')
-#MESSAGE="" #Artist name, year?
-#pull tags from sidecar, if exists. matches filename.
-#TAGS="" #Hashtags.
-#METATAGS="" # -t tag 1 -t tag 2...
-#CW='-t "content-warning"="NSFW"'
-#NOTE="${CLEANLINK} ${MESSAGE} ${TAGS}"
-
-#nak event -c "$NOTE" -t url=$CLEANLINK -t "content-warning"="Explicit" $METATAGS -k 1 --pow 28 --sec $NSECKEY | nak event wss://relay.nostr.band
-
-#testing version
-#nak event -c "$NOTE" -t url=$CLEANLINK $CW $METATAGS -k 1 --pow 28 --sec $NSECKEY
-nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL --sec $NSECKEY | nak event wss://relay.nostr.band
+nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY | nak event wss://relay.nostr.band
