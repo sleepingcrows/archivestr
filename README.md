@@ -1,5 +1,10 @@
 # ArchiveStr
-### A very UNIX-y way of art preservation for Nostr.
+**A very UNIX-y, minimalist tool for publishing and preserving digital art on Nostr**
+
+ArchiveStr lets you upload images, videos, audio, or any file to Nostr in a clean, and automated fashion; using nothing but shell tools and your existing `.txt` metadata sidecars.
+
+ArchiveStr follows the UNIX Philosophy of using existing tools to complete the task.
+
 
 **Requirements**
 ```
