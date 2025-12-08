@@ -109,17 +109,17 @@ echo "Series: ${SERIES[@]}"
 echo "Characters: ${CHARACTERS[@]}"
 echo "Tags: ${TAGS[@]}"
 
-
 CONTENT=""
-TAGLINE=""
 
 echo ===Uploading File===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
 echo "done"
 
-CONTENT+=$UPLOADURL
-CONTENT+=" \n"
+echo "" > note.tmp 
+echo $UPLOADURL >> note.tmp
+
+
 
 counter=0
 set +u
@@ -138,10 +138,12 @@ else
   CONTENT+="$CREATORS"
 fi
 set -u
-CONTENT+=" \n"
+echo $CONTENT >> note.tmp
 HASHTAGS=""
 #Hashtags
 #Bash seems to act pretty dumb when trying to pool together many arrays. Maybe I'm just dumb.
+#Violating DRY for this.
+
 for tag in "${SPECIES[@]}"; do 
   [[ -z "$tag" ]] && continue
   clean=$(printf '%s' "$tag" | sed 's/ /_/g')
@@ -166,30 +168,12 @@ for tag in "${TAGS[@]}"; do
   HASHTAGS+="#$clean "
 done
 
-CONTENT+="$HASHTAGS"
+echo $HASHTAGS >> note.tmp
 echo $CONTENT
 
 # notes:
 # client tag is just -t "client"="name"
 
-#CREATOR=$(grep '^creator:' $SIDECAR | sed -E 's/.*creator:\s*([^\s]+).*/\1/')
-#echo creator: $CREATOR
-#if [ -z $CREATOR ]; then
-#  echo "Sidecar was missing a creator. exiting"
-#  exit 1
-#fi
-
-#LINECOUNT=$(grep "^rating:" $SIDECAR | wc -l)
-#echo $LINECOUNT
-#if [[ $LINECOUNT -gt 1 ]]; then
-#  echo "More than one safety rating, exiting."
-#  exit 1 
-#else
-#  RATING=$(grep '^rating:' $SIDECAR | sed -E 's/.*rating:\s*([^ ]+).*/\1/')
-#  echo $RATING
-#fi
-
-#METATAGS=()
 #METATAGS+=('-t "namespace"="example"')
 
 #if [[ "$RATING" != "safe" ]]; then
@@ -222,4 +206,4 @@ echo $CONTENT
 
 #testing version
 #nak event -c "$NOTE" -t url=$CLEANLINK $CW $METATAGS -k 1 --pow 28 --sec $NSECKEY
-
+nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL --sec $NSECKEY | nak event wss://relay.nostr.band
