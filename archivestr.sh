@@ -120,8 +120,7 @@ echo "===Uploading File to $BLOSSOMSRV2 -- Mirror 1 ==="
 nak blossom --server $BLOSSOMSRV2 --sec 01 upload $1 | jq .url | sed 's/\"//g'
 echo "===Uploading File to $BLOSSOMSRV3 -- Mirror 2 ==="
 nak blossom --server $BLOSSOMSRV3 --sec 01 upload $1 | jq .url | sed 's/\"//g'
-
-#echo "" > note.tmp 
+ 
 echo $UPLOADURL > note.tmp
 
 METADATA=""
@@ -154,7 +153,7 @@ fi
 set -u
 echo $CONTENT >> note.tmp
 HASHTAGS=""
-#Hashtags
+
 #Bash seems to act pretty dumb when trying to pool together many arrays. Maybe I'm just dumb.
 #Violating DRY for this.
 
@@ -187,7 +186,6 @@ for tag in "${TAGS[@]}"; do
 done
 
 echo $HASHTAGS >> note.tmp
-echo $CONTENT
 
 #note cleanup.
 
