@@ -192,6 +192,6 @@ echo $HASHTAGS >> note.tmp
 #note cleanup.
 
 sed -i '3s/[()]//g' note.tmp
-sed -i '3s/[-:]/_/g' note.tmp
+sed -i '3s/[.-:]/_/g' note.tmp
 
 nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY | nak event wss://relay.nostr.band
