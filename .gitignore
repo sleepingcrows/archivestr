@@ -1,3 +1,4 @@
 .env
 uploads/
 note.tmp
+./bulk-upload.sh
