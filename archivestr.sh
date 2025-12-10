@@ -15,6 +15,9 @@ if [[ -f .env ]]; then
   set +a 
 fi 
 
+PROCID=$$
+FILEID=note.$PROCID.tmp
+
 for var in "${REQUIRED[@]}"; do 
   : "${!var?: Missing required environment variable: $var}"
   [[ -n "${!var}" ]] || {
@@ -121,7 +124,7 @@ nak blossom --server $BLOSSOMSRV2 --sec 01 upload $1 | jq .url | sed 's/\"//g'
 echo "===Uploading File to $BLOSSOMSRV3 -- Mirror 2 ==="
 nak blossom --server $BLOSSOMSRV3 --sec 01 upload $1 | jq .url | sed 's/\"//g'
  
-echo $UPLOADURL > note.tmp
+echo $UPLOADURL > $FILEID
 
 METADATA=""
 
@@ -153,7 +156,7 @@ else
   METADATA+="-t creator=$clean "
 fi
 set -u
-echo $CONTENT >> note.tmp
+echo $CONTENT >> $FILEID
 HASHTAGS=""
 
 #Bash seems to act pretty dumb when trying to pool together many arrays. Maybe I'm just dumb.
@@ -187,10 +190,13 @@ for tag in "${TAGS[@]}"; do
   METADATA+="-t t=$clean "
 done
 
-echo $HASHTAGS >> note.tmp
+echo $HASHTAGS >> $FILEID
 
 #note cleanup.
 
-sed -i '3s/[()]//g; 3s/[:!.-]/_/g' note.tmp
+sed -i '3s/[()]//g; 3s/[:!.-]/_/g' $FILEID
 
-nak event -v -k 1 --pow 28 -c @note.tmp -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY wss://relay.nostr.band
+nak event -v -k 1 --pow 28 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY wss://relay.nostr.band wss://nos.lol
+
+#cleanup after yourself.
+rm $FILEID
