@@ -1,4 +1,4 @@
 .env
 uploads/
-note.tmp
+note.*.tmp
 bulk-upload.sh
