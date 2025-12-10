@@ -15,8 +15,7 @@ if [[ -f .env ]]; then
   set +a 
 fi 
 
-PROCID=$$
-FILEID=note.$PROCID.tmp
+FILEID=note.$$.tmp
 
 for var in "${REQUIRED[@]}"; do 
   : "${!var?: Missing required environment variable: $var}"
@@ -196,7 +195,7 @@ echo $HASHTAGS >> $FILEID
 
 sed -i '3s/[()]//g; 3s/[:!.-]/_/g' $FILEID
 
-nak event -v -k 1 --pow 28 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY wss://relay.nostr.band wss://nos.lol
+nak event -v -k 1 --pow 28 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY ${RELAYS[@]}
 
 #cleanup after yourself.
 rm $FILEID
