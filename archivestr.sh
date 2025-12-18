@@ -67,7 +67,7 @@ CHARACTERS=()
 SERIES=() #copyright holders, content titles
 TAGS=() #general tags.
 
-
+#need to make tag processing arbitrary.
 echo "===processing tags.==="
 while IFS= read -r line; do 
   case $line in 
@@ -195,7 +195,7 @@ echo $HASHTAGS >> $FILEID
 
 sed -i '3s/[()]//g; 3s/[:!.-]/_/g' $FILEID
 
-nak event -v -k 1 --pow 28 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY ${RELAYS[@]}
+#nak event -v -k 1 --pow 28 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY ${RELAYS[@]}
 
 #cleanup after yourself.
-rm $FILEID
+#rm $FILEID
