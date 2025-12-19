@@ -94,6 +94,7 @@ while IFS= read -r line; do
 done < $SIDECAR
 
 #Tag Validations
+# how can I check these from a single unsorted array of pairs?
 set +u
 if [ ${#CREATORS[@]} -eq 0 ]; then
   echo "creator missing. exiting"
