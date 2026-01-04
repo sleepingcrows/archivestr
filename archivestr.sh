@@ -8,9 +8,11 @@ REQUIRED=(
   BLOSSOMSRV
   )
 
-
-
-
+if [[ -f .env ]]; then
+  set -a
+  source .env 
+  set +a 
+fi
 
 #Unique Temp File, avoiding mangled 
 FILEID=note.$$.tmp
