@@ -3,6 +3,10 @@
 #Note: Keeping comments verbose on this rebuild for now, need a mental map!
 set -euo pipefail
 #Need to convert Blossom Server lists to an array, make it fail gracefully.
+#Help Line
+: ${1?"Usage: $0 <path to file>
+(every file needs a .txt sidecar with a rating and creator namespace at minimum!)"}
+
 REQUIRED=(
   NSECKEY
   BLOSSOMSRV
@@ -13,6 +17,7 @@ COMMANDS=(
   "grep"
   "nak"
   )
+
 if [[ -f .env ]]; then
   set -a
   source .env 
@@ -47,4 +52,24 @@ if [[ ${#missing_apps[@]} -gt 0 ]]; then
    exit 1
 fi
 
+#check for arguments & valid paths.
+if [ -z {$1} ]; then
+  exit 1
+fi
+
+if [ ! -f $1 ]; then
+  echo "File $1 does not exist."
+  echo "Exiting."
+  exit 1
+fi
+
+SIDECAR="$1.txt"
+
+if [ ! -f $SIDECAR ]; then
+  echo "Sidecar for $1 does not exist."
+  echo "Exiting."
+  exit 1
+fi
+
+#Tag Processing Logic (The major rewrite.)
 
