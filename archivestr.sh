@@ -71,5 +71,23 @@ if [ ! -f $SIDECAR ]; then
   exit 1
 fi
 
-#Tag Processing Logic (The major rewrite.)
 
+#pre-process logic: check if "creator" and "rating" exist, exit if one of them is missing. 
+
+#Tag Processing Logic (The major rewrite.)
+#Process: Read sidecar line by line in Loop.
+# 1. check for ':' exists in the line, telling us it's namespaced.
+# a1. If ':' Exists: find what character it is, store that position.
+# a2. Seperate namespace and tag, store them
+# b1. If ':' Absent: assume it's a regular tag.
+# b2. store namespace as 'tag', store the tag.
+# 2. check if the namespace is special (creator, rating)
+# 2a. If special, Perform special operations
+# 2a.1. Creator: add this to a special array.
+# 2a.2. Rating: Check if it's anything but 'safe', set a flag for later.
+# 3. Execute tag generation logic.
+# 3a. Add the URL to the tmp file, then add a new line for the creator(s). check if it is one, or more to decide
+# what format should be used.
+# 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable.
+# 3c. append the key pair value (key=value) to an array.
+# 4. append the hashtag string variable to the temp file.
