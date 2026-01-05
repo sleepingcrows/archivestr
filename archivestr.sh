@@ -117,11 +117,6 @@ done
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
-#x 1. check for ':' exists in the line, telling us it's namespaced.
-#x a1. If ':' Exists: find what character it is, store that position.
-#x a2. Seperate namespace and tag, store them
-#x b1. If ':' Absent: assume it's a regular tag.
-#x b2. store namespace as 'tag', store the tag.
 # 2. check if the namespace is special (creator, rating)
 # 2a. If special, Perform special operations
 # 2a.1. Creator: add this to a special array.
