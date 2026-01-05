@@ -73,8 +73,19 @@ fi
 
 CREATORS=() #one or more
 RATINGS=() #should only ever be one.
-TAGS=() #key value pairs.
+#TAGS=() #key value pairs.
+declare -A taglist
 HASHTAGS=() #sanitized tags.
+
+append_to_taglist () {
+  key="$1"
+  value="$2"
+#  if [[ ! ${taglist[$key]+isset} ]]; then
+#    taglist[${key}]=
+#  fi
+
+  taglist[$key]+="$value,"
+}
 
 #pre-process logic: check if "creator" and "rating" exist, exit if one of them is missing. 
 while IFS=':' read -r namespace tag; do 
@@ -82,17 +93,35 @@ while IFS=':' read -r namespace tag; do
     tag="$namespace"
     namespace="tag"
   fi
-  echo "namespace: $namespace | tag: $tag"
-
+  #echo "namespace: $namespace | tag: $tag"
+  #check if it's a special namespace (creator, rating)
+  if [ "$namespace" = "creator" ]; then
+    echo "namespace was a creator"
+    CREATORS+=$tag
+  elif [ "$namespace" = "rating" ]; then
+    echo "namespace was a rating"
+    RATINGS+=$tag
+  fi
+  echo "$tag"
+  append_to_taglist "$namespace" "$tag"
+  
 done < $SIDECAR
+echo "==="
+for key in "${!taglist[@]}"; do 
+  echo "$key:"
+  IFS=',' read -r -a values <<< "${taglist[$key]}"
+  for value in "${values[@]}"; do
+    echo "  - $value"
+  done
+done
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
-# 1. check for ':' exists in the line, telling us it's namespaced.
-# a1. If ':' Exists: find what character it is, store that position.
-# a2. Seperate namespace and tag, store them
-# b1. If ':' Absent: assume it's a regular tag.
-# b2. store namespace as 'tag', store the tag.
+#x 1. check for ':' exists in the line, telling us it's namespaced.
+#x a1. If ':' Exists: find what character it is, store that position.
+#x a2. Seperate namespace and tag, store them
+#x b1. If ':' Absent: assume it's a regular tag.
+#x b2. store namespace as 'tag', store the tag.
 # 2. check if the namespace is special (creator, rating)
 # 2a. If special, Perform special operations
 # 2a.1. Creator: add this to a special array.
