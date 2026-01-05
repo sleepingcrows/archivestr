@@ -106,14 +106,33 @@ while IFS=':' read -r namespace tag; do
   append_to_taglist "$namespace" "$tag"
   
 done < $SIDECAR
+
+creatorcount=0
+ratingcount=0
 echo "==="
 for key in "${!taglist[@]}"; do 
   echo "$key:"
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
     echo "  - $value"
+    if [ "$key" = "creator" ]; then
+      creatorcount=$((creatorcount+1))
+    elif [ "$key" = "rating" ]; then
+      ratingcount=$((ratingcount+1))
+    fi
   done
 done
+
+echo "Rating Count: $ratingcount (target = 1) | Creator Count: $creatorcount (target > 0)"
+
+# Minimum Tag Requirements
+if [[ $ratingcount -ne 1 || $creatorcount -lt 1 ]]; then
+  echo "sidecar fails to meet required namespaced tag counts. exiting."
+  exit 1
+else
+  echo "sidecar meets minimum requirements!"
+fi
+
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
