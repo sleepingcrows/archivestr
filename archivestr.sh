@@ -27,7 +27,7 @@ fi
 #Unique Temp File, avoiding mangled 
 FILEID=note.$$.tmp
 
-for var in "${REQUIRED[@]}" do 
+for var in "${REQUIRED[@]}"; do
   : "${!var?: Missing required environment variable: $var}"
   [[ -n "${!var}" ]] || {
     echo "ERROR: $var is set but empty." >&2
@@ -71,8 +71,15 @@ if [ ! -f $SIDECAR ]; then
   exit 1
 fi
 
+CREATORS=() #one or more
+RATINGS=() #should only ever be one.
+HASHTAGS=() #sanitized tags.
 
 #pre-process logic: check if "creator" and "rating" exist, exit if one of them is missing. 
+
+#while IFS= read -r line; do 
+#echo "$line"
+#done 
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
@@ -88,6 +95,7 @@ fi
 # 3. Execute tag generation logic.
 # 3a. Add the URL to the tmp file, then add a new line for the creator(s). check if it is one, or more to decide
 # what format should be used.
-# 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable.
+# 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable. (should we store a t=value too?)
 # 3c. append the key pair value (key=value) to an array.
 # 4. append the hashtag string variable to the temp file.
+
