@@ -76,10 +76,14 @@ RATINGS=() #should only ever be one.
 HASHTAGS=() #sanitized tags.
 
 #pre-process logic: check if "creator" and "rating" exist, exit if one of them is missing. 
+while IFS=':' read -r namespace tag; do 
+  if [ -z "$tag" ]; then
+    tag="$namespace"
+    namespace="tag"
+  fi
+  echo "namespace: $namespace | tag: $tag"
 
-#while IFS= read -r line; do 
-#echo "$line"
-#done 
+done < $SIDECAR
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
