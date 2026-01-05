@@ -73,6 +73,7 @@ fi
 
 CREATORS=() #one or more
 RATINGS=() #should only ever be one.
+TAGS=() #key value pairs.
 HASHTAGS=() #sanitized tags.
 
 #pre-process logic: check if "creator" and "rating" exist, exit if one of them is missing. 
