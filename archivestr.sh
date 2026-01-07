@@ -134,6 +134,19 @@ else
 fi
 
 
+
+# upload the file, store the returned URL 
+# Temp method, does not mirror to multiple services.
+echo ===Uploading File to $BLOSSOMSRV===
+UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
+echo $UPLOADURL
+# start creating the temp file content.
+# > File URL
+# > Creator(s)
+# > all Tags as hashtags, sanitized without namespaces, spaces converted to underscores, and symbols stripped.
+# > create all of the keypairs.
+# > broadcast.
+
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
 # 2. check if the namespace is special (creator, rating)
