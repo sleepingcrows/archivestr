@@ -147,6 +147,12 @@ echo $UPLOADURL
 # > create all of the keypairs.
 # > broadcast.
 
+touch $FILEID
+
+echo $UPLOADURL > $FILEID
+echo ===
+cat $FILEID
+
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
 # 2. check if the namespace is special (creator, rating)
