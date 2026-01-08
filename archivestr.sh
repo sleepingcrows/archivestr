@@ -152,6 +152,14 @@ touch $FILEID
 echo $UPLOADURL > $FILEID
 echo ===
 cat $FILEID
+#this only injects the raw tags in newlines and dumps them directly to the temp file.
+#need to parse each value and add them into a long string before dumping them in.
+for key in "${!taglist[@]}"; do 
+  IFS=',' read -r -a values <<< "${taglist[$key]}"
+  for value in "${values[@]}"; do
+    echo $value >> $FILEID
+  done
+done
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
