@@ -157,7 +157,7 @@ cat $FILEID
 for key in "${!taglist[@]}"; do 
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
-    echo $value >> $FILEID
+    echo "#$value" >> $FILEID
   done
 done
 
