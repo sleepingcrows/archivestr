@@ -25,7 +25,7 @@ if [[ -f .env ]]; then
   set +a 
 fi
 
-#Unique Temp File, avoiding mangled 
+#Unique Temp File, avoiding mangle 
 FILEID=note.$$.tmp
 
 for var in "${REQUIRED[@]}"; do
@@ -91,7 +91,7 @@ while IFS=':' read -r namespace tag; do
 
   if [ "$namespace" = "creator" ]; then
     echo "namespace was a creator"
-    CREATORS+=$tag
+    CREATORS+=($tag)
   elif [ "$namespace" = "rating" ]; then
     echo "namespace was a rating"
     RATINGS+=$tag
@@ -127,12 +127,20 @@ if [[ $ratingcount -ne 1 || $creatorcount -lt 1 ]]; then
   exit 1
 else
   echo "sidecar meets minimum requirements!"
+  set +u 
+  if [[ ! " ${RATINGS[@]} " =~ " safe " ]]; then
+    echo "Content is NSFW, adding CW."
+    METADATA+="-t content-warning=nsfw "
+  fi
+  set -u
 fi
 
 # upload the file, store the returned URL 
 # Temp method, does not mirror to multiple services.
+# I need to make this fail gracefully, and retry anotherserver
+# in case the filesize exceeds the server's size quota.
 echo ===Uploading File to $BLOSSOMSRV===
-UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
+UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec $NSECKEY upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
 
 touch $FILEID
@@ -140,40 +148,43 @@ HASHTAGSTR=""
 echo $UPLOADURL > $FILEID
 echo ===
 
-cat $FILEID
-
 for key in "${!taglist[@]}"; do 
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
-    HASHTAGSTR+=$(echo "#$value" | sed 's/ /_/g; s/[:"!.-]//g; s/[()]//g' | awk {'print $0 " "'} )
+    HASHTAGSTR+=$(echo "#$value" | sed 's/ /_/g; s/[:"!.-]//g; s/[()]//g; s/[][]//g' | awk {'print $0 " "'} )
     METADATA+=$(echo "$key=$value" | sed 's/ /_/g; s/["]//g;' | awk {'print "-t " $0 " "'} )
   done
 done
 
-echo $CREATORS >> $FILEID #This need logic to check if it's a single artist, or multiple.
+counter=0
+CREATORLINE=""
+set +u
+if [ ${#CREATORS[@]} -gt 1 ]; then
+  CREATORLINE+="Creators: "
+  for creator in "${CREATORS[@]}"; do
+    if (( counter == 0 )); then
+      CREATORLINE+="$creator"
+      let "counter+=1"
+    else 
+      CREATORLINE+=", $creator"
+    fi
+  done
+else
+  CREATORLINE+="Creator: $CREATORS"
+fi
+set -u
+echo $CREATORLINE >> $FILEID
 echo $HASHTAGSTR >> $FILEID
 
 cat $FILEID
 echo "==="
 echo $METADATA
 
-#todo: cleanup if this fails?
-nak event -v --pow 1 -k 1 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY
+#for testing without broadcasting.
+#nak event -v --pow 1 -k 1 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY
 
+nak event -v --pow 28 -k 1 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY ${RELAYS[@]}
 
 echo "removing $FILEID"
 rm ./$FILEID
 echo "done!"
-#Tag Processing Logic (The major rewrite.)
-#Process: Read sidecar line by line in Loop.
-# 2. check if the namespace is special (creator, rating)
-# 2a. If special, Perform special operations
-# 2a.1. Creator: add this to a special array.
-# 2a.2. Rating: Check if it's anything but 'safe', set a flag for later.
-#x 3. Execute tag generation logic.
-#x 3a. Add the URL to the tmp file, then add a new line for the creator(s). check if it is one, or more to decide
-#x what format should be used.
-#x 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable. (should we store a t=value too?)
-#x 3c. append the key pair value (key=value) to an array.
-#x 4. append the hashtag string variable to the temp file.
-
