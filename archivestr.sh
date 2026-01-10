@@ -16,6 +16,7 @@ COMMANDS=(
   "sed"
   "grep"
   "nak"
+  "awk"
   )
 
 if [[ -f .env ]]; then
@@ -73,17 +74,11 @@ fi
 
 CREATORS=() #one or more
 RATINGS=() #should only ever be one.
-#TAGS=() #key value pairs.
 declare -A taglist
-HASHTAGS=() #sanitized tags.
 
 append_to_taglist () {
   key="$1"
   value="$2"
-#  if [[ ! ${taglist[$key]+isset} ]]; then
-#    taglist[${key}]=
-#  fi
-
   taglist[$key]+="$value,"
 }
 
@@ -93,8 +88,7 @@ while IFS=':' read -r namespace tag; do
     tag="$namespace"
     namespace="tag"
   fi
-  #echo "namespace: $namespace | tag: $tag"
-  #check if it's a special namespace (creator, rating)
+
   if [ "$namespace" = "creator" ]; then
     echo "namespace was a creator"
     CREATORS+=$tag
@@ -102,6 +96,7 @@ while IFS=':' read -r namespace tag; do
     echo "namespace was a rating"
     RATINGS+=$tag
   fi
+
   echo "$tag"
   append_to_taglist "$namespace" "$tag"
   
@@ -109,6 +104,7 @@ done < $SIDECAR
 
 creatorcount=0
 ratingcount=0
+
 echo "==="
 for key in "${!taglist[@]}"; do 
   echo "$key:"
@@ -133,50 +129,51 @@ else
   echo "sidecar meets minimum requirements!"
 fi
 
-
-
 # upload the file, store the returned URL 
 # Temp method, does not mirror to multiple services.
 echo ===Uploading File to $BLOSSOMSRV===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec 01 upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
-# start creating the temp file content.
-# > File URL
-# > Creator(s)
-# > all Tags as hashtags, sanitized without namespaces, spaces converted to underscores, and symbols stripped.
-# > create all of the keypairs.
-# > broadcast.
 
 touch $FILEID
 HASHTAGSTR=""
 echo $UPLOADURL > $FILEID
 echo ===
+
 cat $FILEID
-#this only injects the raw tags in newlines and dumps them directly to the temp file.
-#need to parse each value and add them into a long string before dumping them in.
+
 for key in "${!taglist[@]}"; do 
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
-    HASHTAGSTR+=$(echo "#$value" | sed 's/ /_/g; s/[:!.-]//g; s/[()]//g' | awk {'print $0 " "'} )
+    HASHTAGSTR+=$(echo "#$value" | sed 's/ /_/g; s/[:"!.-]//g; s/[()]//g' | awk {'print $0 " "'} )
+    METADATA+=$(echo "$key=$value" | sed 's/ /_/g; s/["]//g;' | awk {'print "-t " $0 " "'} )
   done
 done
-
 
 echo $CREATORS >> $FILEID #This need logic to check if it's a single artist, or multiple.
 echo $HASHTAGSTR >> $FILEID
 
 cat $FILEID
+echo "==="
+echo $METADATA
 
+#todo: cleanup if this fails?
+nak event -v --pow 1 -k 1 -c @$FILEID -t client="ArchiveStr" -t url=$UPLOADURL $METADATA --sec $NSECKEY
+
+
+echo "removing $FILEID"
+rm ./$FILEID
+echo "done!"
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
 # 2. check if the namespace is special (creator, rating)
 # 2a. If special, Perform special operations
 # 2a.1. Creator: add this to a special array.
 # 2a.2. Rating: Check if it's anything but 'safe', set a flag for later.
-# 3. Execute tag generation logic.
-# 3a. Add the URL to the tmp file, then add a new line for the creator(s). check if it is one, or more to decide
-# what format should be used.
-# 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable. (should we store a t=value too?)
-# 3c. append the key pair value (key=value) to an array.
-# 4. append the hashtag string variable to the temp file.
+#x 3. Execute tag generation logic.
+#x 3a. Add the URL to the tmp file, then add a new line for the creator(s). check if it is one, or more to decide
+#x what format should be used.
+#x 3b. append 'hashtag', with tag sanitization. (#tag_example) to a string variable. (should we store a t=value too?)
+#x 3c. append the key pair value (key=value) to an array.
+#x 4. append the hashtag string variable to the temp file.
 
