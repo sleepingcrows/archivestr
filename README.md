@@ -8,6 +8,7 @@ ArchiveStr follows the UNIX Philosophy of using existing tools to complete the t
 
 **Requirements**
 ```
+awk
 sed
 grep
 nak (github.com/fiatjaf/nak)
