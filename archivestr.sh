@@ -148,7 +148,7 @@ echo $UPLOADURL
 # > broadcast.
 
 touch $FILEID
-
+HASHTAGSTR=""
 echo $UPLOADURL > $FILEID
 echo ===
 cat $FILEID
@@ -157,9 +157,12 @@ cat $FILEID
 for key in "${!taglist[@]}"; do 
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
-    echo "#$value" >> $FILEID
+    HASHTAGSTR+=$(echo "#$value ")
   done
 done
+
+echo $CREATORS >> $FILEID #This need logic to check if it's a single artist, or multiple.
+echo $HASHTAGSTR >> $FILEID
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
