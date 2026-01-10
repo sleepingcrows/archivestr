@@ -157,12 +157,15 @@ cat $FILEID
 for key in "${!taglist[@]}"; do 
   IFS=',' read -r -a values <<< "${taglist[$key]}"
   for value in "${values[@]}"; do
-    HASHTAGSTR+=$(echo "#$value ")
+    HASHTAGSTR+=$(echo "#$value" | sed 's/ /_/g; s/[:!.-]//g; s/[()]//g' | awk {'print $0 " "'} )
   done
 done
 
+
 echo $CREATORS >> $FILEID #This need logic to check if it's a single artist, or multiple.
 echo $HASHTAGSTR >> $FILEID
+
+cat $FILEID
 
 #Tag Processing Logic (The major rewrite.)
 #Process: Read sidecar line by line in Loop.
