@@ -139,6 +139,10 @@ fi
 # Temp method, does not mirror to multiple services.
 # I need to make this fail gracefully, and retry anotherserver
 # in case the filesize exceeds the server's size quota.
+
+# Determine if the file has a previous post associated with the target npub
+# To perform a content update, instead of a new post.
+
 echo ===Uploading File to $BLOSSOMSRV===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec $NSECKEY upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
