@@ -145,7 +145,7 @@ fi
 # we need to find the lastest post from the account, containing the sha256 sum of the file 
 # which will match in the URL and content body. 
 # pull the postid from that result, and store it in an e tag. e=postid
-
+# Not quite sure how to go about this yet.
 echo ===Uploading File to $BLOSSOMSRV===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec $NSECKEY upload $1 | jq .url | sed 's/\"//g')
 echo $UPLOADURL
