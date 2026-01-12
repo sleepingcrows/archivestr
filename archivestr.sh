@@ -142,6 +142,9 @@ fi
 
 # Determine if the file has a previous post associated with the target npub
 # To perform a content update, instead of a new post.
+# we need to find the lastest post from the account, containing the sha256 sum of the file 
+# which will match in the URL and content body. 
+# pull the postid from that result, and store it in an e tag. e=postid
 
 echo ===Uploading File to $BLOSSOMSRV===
 UPLOADURL=$(nak blossom --server $BLOSSOMSRV --sec $NSECKEY upload $1 | jq .url | sed 's/\"//g')
